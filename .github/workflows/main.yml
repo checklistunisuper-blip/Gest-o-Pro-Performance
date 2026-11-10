@@ -33,6 +33,13 @@ jobs:
       - name: Instalar dependencias
         run: npm install
 
+      - name: Copiar bibliotecas de PDF e Word para o app
+        run: |
+          mkdir -p www/lib
+          cp node_modules/html2pdf.js/dist/html2pdf.bundle.min.js www/lib/html2pdf.js
+          cp node_modules/docx/dist/index.iife.js www/lib/docx.js
+          ls -la www/lib
+
       - name: Criar projeto Android
         run: npx cap add android
 
