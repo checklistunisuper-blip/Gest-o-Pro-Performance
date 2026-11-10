@@ -1,5 +1,5 @@
 # Super Pro Performance - gera o APK de teste pelo GitHub
-# Caminho no repositorio: .github/workflows/main.yml
+# Caminho no repositorio: .github/workflows/main.yml (ou android-apk.yml: use o nome que ja existe)
 name: Gerar APK
 
 on:
@@ -35,6 +35,83 @@ jobs:
 
       - name: Criar projeto Android
         run: npx cap add android
+
+      - name: Adicionar impressao nativa (Imprimir / salvar PDF)
+        run: |
+          D=$(dirname "$(find android/app/src/main/java -name MainActivity.java | head -n 1)")
+          PKG=$(grep -m1 '^package ' "$D/MainActivity.java" | sed 's/package \(.*\);/\1/')
+          echo "Pasta: $D  Pacote: $PKG"
+          cat > "$D/NativePrintPlugin.java" <<EOF
+          package $PKG;
+
+          import android.content.Context;
+          import android.os.Handler;
+          import android.os.Looper;
+          import android.print.PrintAttributes;
+          import android.print.PrintDocumentAdapter;
+          import android.print.PrintJob;
+          import android.print.PrintManager;
+          import android.webkit.WebView;
+          import com.getcapacitor.Plugin;
+          import com.getcapacitor.PluginCall;
+          import com.getcapacitor.PluginMethod;
+          import com.getcapacitor.annotation.CapacitorPlugin;
+
+          @CapacitorPlugin(name = "NativePrint")
+          public class NativePrintPlugin extends Plugin {
+            @PluginMethod
+            public void print(final PluginCall call) {
+              final String name = call.getString("name", "Super Pro Performance");
+              final boolean landscape = Boolean.TRUE.equals(call.getBoolean("landscape", false));
+              getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                  try {
+                    WebView wv = getBridge().getWebView();
+                    PrintManager pm = (PrintManager) getActivity().getSystemService(Context.PRINT_SERVICE);
+                    PrintDocumentAdapter adapter = wv.createPrintDocumentAdapter(name);
+                    PrintAttributes.MediaSize size = landscape
+                      ? PrintAttributes.MediaSize.ISO_A4.asLandscape()
+                      : PrintAttributes.MediaSize.ISO_A4.asPortrait();
+                    PrintAttributes attrs = new PrintAttributes.Builder()
+                      .setMediaSize(size)
+                      .setMinMargins(PrintAttributes.Margins.NO_MARGINS)
+                      .build();
+                    final PrintJob job = pm.print(name, adapter, attrs);
+                    final Handler h = new Handler(Looper.getMainLooper());
+                    h.postDelayed(new Runnable() {
+                      @Override
+                      public void run() {
+                        if (job.isCompleted() || job.isCancelled() || job.isFailed()) {
+                          call.resolve();
+                        } else {
+                          h.postDelayed(this, 500);
+                        }
+                      }
+                    }, 1000);
+                  } catch (Exception e) {
+                    call.reject(String.valueOf(e.getMessage()));
+                  }
+                }
+              });
+            }
+          }
+          EOF
+          cat > "$D/MainActivity.java" <<EOF
+          package $PKG;
+
+          import android.os.Bundle;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+            @Override
+            public void onCreate(Bundle savedInstanceState) {
+              registerPlugin(NativePrintPlugin.class);
+              super.onCreate(savedInstanceState);
+            }
+          }
+          EOF
+          cat "$D/MainActivity.java"
 
       - name: Gerar icones e tela de abertura
         run: npx capacitor-assets generate --android
