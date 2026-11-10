@@ -1,0 +1,7 @@
+{
+  "appId": "com.superpro.performance",
+  "appName": "Super Pro Performance",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "backgroundColor": "#0b3f8f"
+}
