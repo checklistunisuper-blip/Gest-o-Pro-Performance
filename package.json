@@ -1,3 +1,4 @@
+
 {
   "name": "super-pro-performance",
   "version": "1.0.0",
@@ -14,7 +15,8 @@
     "@capacitor/core": "^7.0.0",
     "@capacitor-community/keep-awake": "^7.1.0",
     "@capacitor/filesystem": "^7.0.0",
-    "@capacitor/share": "^7.0.0"
+    "@capacitor/share": "^7.0.0",
+    "html2pdf.js": "^0.10.3"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
