@@ -23,16 +23,19 @@ Se o fluxo ficar vermelho, abra o passo que falhou e envie a mensagem para quem 
 |---|---|
 | `www/index.html` | o app completo (telas, regras de meta, escala, certificado, corrida) |
 | `www/db-local.js` | guarda os dados no próprio tablet (versão 1) |
+| `www/lib/` | bibliotecas que geram PDF e Word dentro do app (jsPDF e docx) |
+| `www/manifest.webmanifest`, `www/icons/` | nome e ícone de instalação |
 | `capacitor.config.json` | nome do app e identificação do pacote (`com.superpro.performance`) |
 | `package.json` | lista de componentes usados na compilação |
 | `assets/` | ícone Gestão PRO e tela de abertura (geram os ícones do Android) |
-| `.github/workflows/android-apk.yml` | receita que compila o APK no GitHub |
+| `.github/workflows/main.yml` | receita que compila o APK no GitHub |
 | `supabase/schema.sql` | esquema do banco central (para a próxima etapa) |
 
 ## Limites desta versão 1 do APK
 
 - **Dados só no tablet:** cada tablet guarda os próprios vendedores, vendas e senhas. O que a gestão cadastra em um tablet **não aparece** nos outros. Serve para testar telas e regras em um tablet (por exemplo, o tablet da gestão e dos vendedores juntos). Para vários tablets verem o mesmo ranking é preciso ligar o Supabase (próxima etapa).
-- **Impressão e PDF:** os botões de imprimir / salvar PDF dependem do navegador e podem não funcionar dentro do APK.
+- **PDF, Word e imagem:** os botões geram o arquivo dentro do app e abrem o compartilhamento do Android (salvar em Arquivos, enviar por WhatsApp, e-mail ou imprimir pelo aplicativo de PDF). O botão "Imprimir" do navegador só aparece fora do APK.
+- **Enviar resultado:** a mensagem de resultado, bruto e ticket médio abre o compartilhamento do Android (WhatsApp e outros).
 - **APK de teste:** é assinado com a chave de teste do Android. Para distribuir oficialmente, é preciso assinar com uma chave própria.
 - **Segurança:** os logins da gestão e dos vendedores são conferidos dentro do próprio app. Servem para o piloto interno; o login seguro vem com o Supabase.
 - Os acessos iniciais da gestão são os combinados na conversa; troque-os pelo menu *Mais → Senha* no primeiro uso.
