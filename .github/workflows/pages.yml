@@ -1,5 +1,4 @@
-# Publica o app como site (PWA) no GitHub Pages
-# Caminho no repositorio: .github/workflows/pages.yml
+
 name: Publicar PWA
 
 on:
@@ -19,24 +18,42 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
       - name: Instalar dependencias
-        run: npm install
-      - name: Copiar bibliotecas de PDF e Word
+        run: npm ci
+
+      - name: Preparar bibliotecas PDF e Word
         run: |
           mkdir -p www/lib
+
+          test -f node_modules/html2pdf.js/dist/html2pdf.bundle.min.js
+          test -f node_modules/docx/dist/index.iife.js
+
           cp node_modules/html2pdf.js/dist/html2pdf.bundle.min.js www/lib/html2pdf.js
           cp node_modules/docx/dist/index.iife.js www/lib/docx.js
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+
+          echo "Bibliotecas copiadas com sucesso!"
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Preparar arquivos do site
+        uses: actions/upload-pages-artifact@v3
         with:
           path: www
-      - id: deployment
+
+      - name: Publicar PWA
+        id: deployment
         uses: actions/deploy-pages@v4
