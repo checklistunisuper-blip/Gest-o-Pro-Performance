@@ -24,22 +24,26 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          package-manager-cache: false
 
       - name: Instalar dependencias
-        run: npm ci
+        run: npm install
+
+      - name: Verificar bibliotecas
+        run: |
+          test -f node_modules/html2pdf.js/dist/html2pdf.bundle.min.js
+          test -f node_modules/docx/dist/index.iife.js
 
       - name: Preparar bibliotecas PDF e Word
         run: |
           mkdir -p www/lib
-
-          test -f node_modules/html2pdf.js/dist/html2pdf.bundle.min.js
-          test -f node_modules/docx/dist/index.iife.js
 
           cp node_modules/html2pdf.js/dist/html2pdf.bundle.min.js www/lib/html2pdf.js
           cp node_modules/docx/dist/index.iife.js www/lib/docx.js
